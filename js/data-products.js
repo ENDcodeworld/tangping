@@ -24,4 +24,10 @@ window.TP_PRODUCTS = [
   { id: 'p18', name: '白噪音机', desc: '雨声、海浪、风扇声，把出租屋变成森林。', price: 89, origPrice: 139, category: '睡眠', emoji: '🌊', rating: 4.6, sales: 950, tags: ['白噪音', '助眠', '专注'] }
 ];
 
-window.TP_PRODUCT_CATS = ['全部', '睡眠', '办公', '降噪', '户外', '居家', '解压', '学习'];
+window.TP_PRODUCT_CATS = ['全部', '睡眠', '办公', '降噪', '户外', '居家', '解压', '学习'
+,
+  { id: 'p19', name: '蒸汽热敷眼罩', desc: '午休 20 分钟发热热敷，眼睛一酸就贴一片，把疲劳蒸出去。', price: 29.9, origPrice: 49.9, category: '睡眠', emoji: '🌡️', rating: 4.7, sales: 7600, tags: ['午休', '热敷', '缓解眼疲'] },
+  { id: 'p20', name: '薰衣草助眠香薰', desc: '淡淡薰衣草香，点上十分钟，房间变成能深呼吸的地方。', price: 49, origPrice: 89, category: '居家', emoji: '🕯️', rating: 4.6, sales: 3400, tags: ['助眠', '香薰', '放松'] },
+  { id: 'p21', name: '加厚冥想坐垫', desc: '打坐、冥想、盘腿发呆专用，腰一靠，杂念自动靠边。', price: 79, origPrice: 129, category: '解压', emoji: '🧘', rating: 4.5, sales: 1500, tags: ['冥想', '打坐', '蒲团'] }
+
+];
