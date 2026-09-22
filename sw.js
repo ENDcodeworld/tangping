@@ -1,5 +1,5 @@
-/* 躺平 Service Worker：静态资源预缓存 + 运行时缓存，离线可用 */
-const CACHE_STATIC = 'tp-static-v2';
+﻿/* 韬哄钩 Service Worker锛氶潤鎬佽祫婧愰缂撳瓨 + 杩愯鏃剁紦瀛橈紝绂荤嚎鍙敤 */
+const CACHE_STATIC = 'tp-static-v7';
 
 const STATIC_ASSETS = [
   './',
@@ -8,6 +8,7 @@ const STATIC_ASSETS = [
   './js/data-products.js',
   './js/data-articles.js',
   './js/data-quiz.js',
+  './js/data-feed.js',
   './js/app.js',
   './manifest.webmanifest',
   './icons/icon.svg',
@@ -34,7 +35,7 @@ self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
   if (url.origin !== location.origin) return;
 
-  // 静态资源：网络优先，离线回退缓存；SPA 导航回退 index.html
+  // 闈欐€佽祫婧愶細缃戠粶浼樺厛锛岀绾垮洖閫€缂撳瓨锛汼PA 瀵艰埅鍥為€€ index.html
   e.respondWith(
     fetch(e.request).then(res => {
       if (res.ok) {
@@ -49,3 +50,4 @@ self.addEventListener('fetch', e => {
     )
   );
 });
+
