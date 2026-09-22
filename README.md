@@ -1,31 +1,31 @@
-# 躺平 · 反内卷生活指南（PWA）
+# 🛌 躺平 · 反内卷生活指南
 
-一个纯前端、零依赖、离线可用的「躺平」主题 PWA 小应用。没有框架、没有构建工具、没有后端，所有数据都存在你自己的浏览器 localStorage 里。
+![PWA](https://img.shields.io/badge/PWA-ready-7FB069) ![纯前端](https://img.shields.io/badge/纯前端-零依赖-7FB069) ![离线可用](https://img.shields.io/badge/离线-可用-7FB069) ![深色模式](https://img.shields.io/badge/深色模式-已支持-8B8680)
 
-## ✨ 功能列表
+**在线访问：https://endcodeworld.github.io/tangping/**
 
-底部 5 个 Tab 对应五个核心功能：
+一个纯前端、零依赖、离线可用的「躺平」主题 PWA。没有框架、没有构建工具、没有后端，所有数据都存在你自己的浏览器 localStorage 里。不卷，不慌，慢慢来。
 
-1. **首页（#/）** — 今日躺平打卡
-   - Hero 区 + 轮播金句（反内卷宣言 / 低消费提示 / 不看群提醒）
-   - 记录今天躺了多久（小时）、摸鱼指数（1-10 滑块）、自动估算消耗卡路里（按体重微调）
-   - 最近 7 天打卡趋势（纯 CSS 柱状图）
-   - 快捷入口直达其余页面
-2. **反内卷内容（#/articles）** — 12 篇干货文章，分三类：摸鱼技巧 / 低消费生活指南 / 下班不看群方法
-   - 分类筛选、文章详情、点赞、相关推荐
-3. **躺平指数测试（#/quiz）** — 10 道选择题，逐题作答 + 进度条
-   - 四档等级：咸鱼 / 半躺 / 全躺 / 躺平大师
-   - 纯 CSS 五维雷达图、复制结果分享、重新测试
-4. **躺平商店（#/shop）** — 18 个「躺平神器」商品
-   - 分类筛选 + 排序（销量 / 评分 / 价格）
-   - 商品详情、数量选择、加入购物车、收藏
-   - 购物车增减、模拟结算（不产生真实交易）
-5. **FIRE 低消费计算器（#/fire）** — 4% 法则
-   - 输入存款 / 月支出 / 月收入 / 收益率 / 年龄
-   - 复利公式估算 FIRE 目标金额、当前进度、预计退休年龄
-   - 低消费生活小贴士
+## ✨ 功能
 
-另有 **个人中心（#/profile）**：可编辑昵称头像、躺平修为徽章（初入躺门 → 躺平宗师）、统计卡片、打卡记录、最近测试结果、深色模式开关、PWA 安装、清除数据。
+| 功能 | 路由 | 说明 |
+|---|---|---|
+| 📊 今日躺平打卡 | `#/` | 一键打卡（默认 8h），记录躺平时长 / 摸鱼指数 / 消耗卡路里，7 天趋势图 |
+| 📖 反内卷文章 | `#/articles` | 17 篇干货：摸鱼技巧 / 低消费指南 / 不看群方法 / 情绪健康，分类筛选 + 详情 |
+| 🎯 躺平指数测试 | `#/quiz` | 10 题自动跳题，四档等级（咸鱼→躺平大师），五维雷达图，复制分享 |
+| 🛍️ 躺平商店 | `#/shop` | 21 个躺平神器（眼罩 / 靠枕 / 降噪耳机 / 香薰…），加购 + 购物车 + 模拟结算 |
+| 🔥 FIRE 计算器 | `#/fire` | 4% 法则，复利公式算目标金额 / 进度 / 预计退休年龄，改数字即时出结果 |
+| 💬 躺平树洞 | `#/feed` | 本地社区信息流，种子帖 / 发帖 / 点赞 / 评论 + emoji + 图片评论 |
+| 📈 今日战报 | `#/report` | 连续打卡天数 / 累计统计 / 超过打工人百分比 / 一键复制分享文案 |
+| 👤 个人中心 | `#/profile` | 昵称头像 / 躺平修为等级 / 统计 / 深色模式 / PWA 安装 |
+
+## 🎨 设计
+
+- 米白 `#FAF8F5` · 浅绿 `#7FB069` · 暖灰 `#8B8680` · 暖橙 `#E8B04C`
+- 深色模式自动切换，内联脚本防闪烁
+- 移动端优先，底部 Tab 栏，桌面端自动隐藏
+- 轻柔动效（`cubic-bezier(.22,.61,.36,1)`），无夸张弹跳
+- 所有图标用 emoji，零外部图片依赖，离线完整可用
 
 ## 🗂️ 项目结构
 
@@ -33,62 +33,39 @@
 躺平/
 ├── index.html              # 入口
 ├── manifest.webmanifest    # PWA manifest
-├── sw.js                   # Service Worker（离线缓存，cache 版本 tp-static-v1）
-├── css/style.css           # 设计系统（米白 + 浅绿 + 暖橙，深色模式）
+├── sw.js                   # Service Worker（离线缓存，当前 tp-static-v7）
+├── css/style.css           # 设计系统
 ├── js/
-│   ├── data-products.js    # window.TP_PRODUCTS 商品数据
-│   ├── data-articles.js    # window.TP_ARTICLES 文章数据
-│   ├── data-quiz.js        # window.TP_QUIZ 测试题数据
-│   └── app.js              # 路由 + 全部页面逻辑
+│   ├── app.js              # hash 路由 + 全部页面逻辑
+│   ├── data-products.js    # 21 个商品（window.TP_PRODUCTS）
+│   ├── data-articles.js   # 17 篇文章（window.TP_ARTICLES）
+│   ├── data-quiz.js       # 10 道测试题（window.TP_QUIZ）
+│   └── data-feed.js        # 树洞种子帖（window.TP_FEED_SEED）
 ├── icons/
 │   ├── icon.svg
 │   ├── icon-192.png
 │   └── icon-512.png
-├── img/                    # 占位（本项目全部用 emoji，无外部图片）
-├── make-icons.ps1          # PNG 图标生成脚本
+├── make-icons.ps1
 ├── .gitignore
 └── README.md
 ```
 
 ## 🚀 本地运行
 
-Service Worker 只在 `http://` / `https://` 下生效，直接双击 `index.html`（file://）无法离线安装。推荐用本地静态服务器：
-
 ```powershell
 cd D:\云\躺平
 python -m http.server 8080
 ```
 
-然后浏览器访问 <http://localhost:8080>。
-
-> 也可以用 `npx serve .` 等任意静态服务器，但本项目本身不需要任何 npm 依赖。
-
-## 📤 部署到 GitHub Pages
-
-由于本机 `gh` CLI 未登录，请按以下步骤手动操作：
-
-1. 在 GitHub 上新建一个空仓库，名字建议为 `tangping`（不要勾选 README / .gitignore，避免冲突）。
-2. 在本目录执行：
-   ```powershell
-   git remote add origin https://github.com/<你的用户名>/tangping.git
-   git push -u origin main
-   ```
-3. 打开仓库页面 → **Settings** → 左侧 **Pages**：
-   - **Source** 选 `Deploy from a branch`
-   - **Branch** 选 `main`，文件夹选 `/ (root)`
-   - 保存，等待 1-2 分钟
-4. 访问 `https://<你的用户名>.github.io/tangping/` 即可。
-
-> 注意：GitHub Pages 默认是 HTTPS，Service Worker 与 manifest 都会正常工作。若仓库名不是 `tangping`，把上面 URL 里的 `tangping` 换成你的仓库名即可。
+浏览器访问 <http://localhost:8080>（Service Worker 需要 http 协议，file:// 不生效）。
 
 ## 🛠️ 技术要点
 
-- 纯前端 SPA，hash 路由（`#/`、`#/article/:id`、`#/product/:id`…）
-- localStorage 统一使用 `tp_` 前缀（`tp_checkins` / `tp_cart` / `tp_favs` / `tp_theme` / `tp_fire_profile` / `tp_quiz_result`…）
-- 所有图片用 emoji 或 CSS 渐变，不引用任何外部图片 URL，确保离线可用
-- 深色模式通过 `<html data-theme="dark">` + 内联脚本提前设置，避免刷新闪烁
-- 动效统一 `cubic-bezier(.22,.61,.36,1)`，0.2–0.4s，不做夸张弹跳
+- 纯前端 SPA，hash 路由，无框架无构建
+- localStorage 统一 `tp_` 前缀（`tp_checkins` / `tp_cart` / `tp_feed_posts` / `tp_fire_profile` …）
+- 离线 PWA：sw.js 预缓存所有静态资源，断网可打开
+- 社区功能在纯静态站下的能力边界：所有数据仅存本机浏览器，不同设备 / 浏览器之间不互通；清空浏览器数据会丢失本地帖子和评论。
 
 ## 📝 License
 
-本项目仅为学习 / 演示用途，商店流程不产生真实交易。
+学习 / 演示用途，商店流程不产生真实交易。
