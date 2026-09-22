@@ -61,6 +61,31 @@ const getFireProfile = () => store.get('fire_profile', { pv: 100000, expense: 40
 const getNickname = () => getStr('nickname') || '躺平新人';
 const getAvatar = () => getStr('avatar') || '🛌';
 const getWeight = () => { const w = parseFloat(getStr('weight')); return w > 0 ? w : 65; };
+/* 躺平树洞 */
+const getFeedPosts = () => store.get('feed_posts', []);
+const getFeedLikes = () => store.get('feed_likes', []);
+const getFeedComments = () => store.get('feed_comments', {});
+function allFeedPosts() { return [...getFeedPosts()].reverse().concat(window.TP_FEED || []); }
+function toggleFeedLike(id) {
+  const l = getFeedLikes(); const i = l.indexOf(id);
+  if (i >= 0) l.splice(i, 1); else l.push(id);
+  store.set('feed_likes', l);
+}
+const getFeedCLikes = () => store.get('feed_clikes', {});
+function toggleFeedCLike(key) {
+  const m = getFeedCLikes(); m[key] = !m[key]; store.set('feed_clikes', m);
+}
+
+function addFeedComment(id, text) {
+  const cm = getFeedComments();
+  (cm[id] = cm[id] || []).push({ author: getNickname(), avatar: getAvatar(), text, mins: '刚刚' });
+  store.set('feed_comments', cm);
+}
+function addFeedPost(text) {
+  const posts = getFeedPosts();
+  posts.push({ id: 'u' + Date.now(), author: getNickname(), avatar: getAvatar(), mins: '刚刚', text, likes: 0, comments: [] });
+  store.set('feed_posts', posts);
+}
 
 /* 修为等级 */
 const CULTIVATION = [
@@ -76,6 +101,15 @@ function cultivationOf(days) { return CULTIVATION.find(c => days >= c.min) || CU
 const checkinDays = () => getCheckins().length;
 const totalHours = () => getCheckins().reduce((s, c) => s + (c.hours || 0), 0);
 const totalKcal = () => getCheckins().reduce((s, c) => s + (c.kcal || 0), 0);
+function streakDays() {
+  const set = new Set(getCheckins().map(c => c.date));
+  const d = new Date();
+  const fmt = () => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  if (!set.has(fmt())) d.setDate(d.getDate() - 1);
+  let n = 0;
+  while (set.has(fmt())) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
 
 /* 一键打卡：静默写入；返回是否今天第一次 */
 function recordToday(hours) {
@@ -127,13 +161,16 @@ function pageHome() {
 
   const ckHours = todayRec ? todayRec.hours : 8;
   const hourOpts = [6, 8, 10];
+  const QUOTES = ['慢慢来，谁都有自己的时区', '今天不努力，明天也不努力', '休息是最好的进步'];
+  const quote = QUOTES[Math.floor(Math.random() * QUOTES.length)];
 
   return `
   <div class="anim">
     <section class="hero hero-quiet">
       <div class="hero-inner">
-        <h1>今天也辛苦了。<br>躺一会儿吧。</h1>
-        <p>不卷，不慌，慢慢来。</p>
+        <div class="tiny">今日金句</div>
+        <h1 class="hero-quote">${quote}</h1>
+        <p>今天也辛苦了，躺一会儿吧。</p>
       </div>
     </section>
 
@@ -153,12 +190,14 @@ function pageHome() {
       ${chartHTML}
     </div>
 
+    <a class="report-link" href="#/report">📊 今日躺平战报 →</a>
     <h3 class="sec-title">随便看看</h3>
     <div class="quick-grid">
       <a class="quick-item" href="#/articles"><span class="qi">📖</span><b>反内卷</b><span>摸鱼 / 低消费 / 不看群</span></a>
       <a class="quick-item" href="#/quiz"><span class="qi">🎯</span><b>你有多躺？</b><span>随便测测</span></a>
       <a class="quick-item" href="#/shop"><span class="qi">🛍️</span><b>躺平商店</b><span>随便逛逛</span></a>
       <a class="quick-item" href="#/fire"><span class="qi">🔥</span><b>FIRE 计算器</b><span>算算几岁能退</span></a>
+      <a class="quick-item" href="#/feed"><span class="qi">💬</span><b>躺平树洞</b><span>随便说点什么</span></a>
     </div>
   </div>`;
 }
@@ -418,6 +457,7 @@ function pageFire() {
       </div>
     </div>
     <div id="fireResult"></div>
+    <div class="tip-box" style="background:var(--orange-soft);color:var(--orange-deep);margin-top:18px">💛 小提示：FIRE 不是为了无所事事，是为了把时间花在喜欢的事上。</div>
     <div class="panel">
       <h3>🌿 低消费小贴士</h3>
       <div class="tip-box" style="margin-top:4px">① 外食变成"仪式"而不是"默认"，每月轻松省下上千元。</div>
@@ -537,6 +577,85 @@ function pageProfile() {
   </div>`;
 }
 
+/* ============ 页面：躺平树洞 ============ */
+function pageFeed() {
+  const posts = allFeedPosts();
+  const likes = getFeedLikes();
+  const allCmts = getFeedComments();
+  const clikes = getFeedCLikes();
+  const cards = posts.map(p => {
+    const liked = likes.includes(p.id);
+    const lk = (p.likes || 0) + (liked ? 1 : 0);
+    const cs = (allCmts[p.id] || p.comments || []);
+    return `<article class="feed-card">
+      <div class="feed-head"><span class="feed-ava">${p.avatar}</span>
+        <div><div class="feed-author">${esc(p.author)}</div><div class="tiny">${esc(p.mins)}</div></div></div>
+      <p class="feed-text">${esc(p.text)}</p>
+      <div class="feed-actions">
+        <button class="feed-like ${liked ? 'on' : ''}" data-like="${p.id}">${liked ? '❤️' : '🤍'} ${lk}</button>
+        <button class="feed-cmt" data-cmt="${p.id}">💬 ${cs.length} 条</button>
+      </div>
+      <div class="feed-cbox" id="cbox-${p.id}">
+        ${cs.map((c, ci) => { const key = p.id + ':' + ci; const kon = clikes[key]; const cn = (c.likes || 0) + (kon ? 1 : 0); return `<div class="feed-c"><div class="feed-c-top"><b>${c.avatar} ${esc(c.author)}</b><span class="tiny">${esc(c.mins || '')}</span></div><div class="feed-c-text">${esc(c.text)}</div><button class="feed-clike ${kon ? 'on' : ''}" data-clike="${key}">${kon ? '❤️' : '🤍'} ${cn}</button></div>`; }).join('') || '<div class="tiny" style="padding:6px 0">还没人说，抢个沙发</div>'}
+        <div class="feed-cinput"><input type="text" placeholder="说点什么…" data-cinput="${p.id}"><button data-csend="${p.id}">发</button></div>
+      </div>
+    </article>`;
+  }).join('');
+  return `
+  <div class="anim">
+    <h3 class="sec-title">💬 躺平树洞</h3>
+    <div class="panel feed-compose">
+      <textarea id="feedText" rows="2" placeholder="随便说点什么，这里没人认识你…"></textarea>
+      <button class="btn btn-green" id="feedSend">说出来</button>
+    </div>
+    <div class="feed-list">${cards}</div>
+  </div>`;
+}
+
+/* ============ 页面：今日躺平战报 ============ */
+function pageReport() {
+  const cks = getCheckins();
+  const today = todayStr();
+  const rec = cks.find(c => c.date === today);
+  const streak = streakDays();
+  const hours = Math.round(totalHours() * 10) / 10;
+  const kcal = Math.round(totalKcal());
+  const todayH = rec ? rec.hours : 0;
+  const todayIdx = rec ? rec.index : 0;
+  const todayK = rec ? Math.round(rec.kcal) : 0;
+  const beat = Math.min(95, 35 + streak * 7 + Math.round(hours * 0.6));
+  const grade = cultivationOf(cks.length);
+  let line;
+  if (streak >= 7) line = '连续躺平一周，已渐入佳境。';
+  else if (streak >= 3) line = '势头不错，保持这个节奏。';
+  else if (rec) line = '今天开了个好头，明天继续。';
+  else line = '今天还没躺，现在开始也不晚。';
+  const share = `【躺平战报】今天躺了 ${todayH} 小时，摸鱼 ${todayIdx}/10，约消耗 ${todayK} 大卡。已连续躺平 ${streak} 天，累计 ${hours} 小时，超过了 ${beat}% 的打工人。${grade.emoji} ${grade.name}。今天也辛苦了。`;
+  return `
+  <div class="anim report-wrap">
+    <div class="report-card">
+      <div class="report-deco">🛌</div>
+      <div class="tiny" style="text-align:center">今日躺平战报</div>
+      <h2 style="text-align:center;font-size:22px;font-weight:900;margin:6px 0 4px">${grade.emoji} ${grade.name}</h2>
+      <div class="tiny" style="text-align:center">${today}</div>
+      <div class="report-big">${todayH}<span class="u">h</span></div>
+      <div class="tiny" style="text-align:center">今天躺了 ${todayH} 小时 · 摸鱼 ${todayIdx}/10 · 约 ${todayK} 大卡</div>
+      <div class="report-stats">
+        <div><b>${streak}<span class="u">天</span></b><span>连续</span></div>
+        <div><b>${hours}<span class="u">h</span></b><span>累计</span></div>
+        <div><b>${kcal}<span class="u">kcal</span></b><span>总消耗</span></div>
+      </div>
+      <div class="beat-bar"><i style="width:${beat}%"></i></div>
+      <div class="tiny" style="text-align:center;margin-top:6px">超过了 <b style="color:var(--green)">${beat}%</b> 的打工人</div>
+      <p class="report-line">${line}</p>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:16px">
+      <button class="btn btn-green" id="reportShare">复制战报</button>
+      <a class="btn btn-ghost" href="#/">回到首页</a>
+    </div>
+  </div>`;
+}
+
 /* ============ 路由表 ============ */
 const routes = {
   '': pageHome,
@@ -547,6 +666,8 @@ const routes = {
   'product': id => pageProductDetail(id),
   'cart': () => pageCart(),
   'fire': () => pageFire(),
+  'feed': () => pageFeed(),
+  'report': () => pageReport(),
   'profile': () => pageProfile()
 };
 
@@ -657,6 +778,37 @@ function bindPageEvents(page) {
     if (el) el.addEventListener('input', computeFire);
   });
   if ($('#fPv')) computeFire();
+  /* 战报 */
+  const reportShare = $('#reportShare');
+  if (reportShare) reportShare.addEventListener('click', () => {
+    const rec = getCheckins().find(c => c.date === todayStr());
+    const grade = cultivationOf(getCheckins().length);
+    const hours = Math.round(totalHours() * 10) / 10;
+    const streak = streakDays();
+    const beat = Math.min(95, 35 + streak * 7 + Math.round(hours * 0.6));
+    const todayH = rec ? rec.hours : 0, todayIdx = rec ? rec.index : 0, todayK = rec ? Math.round(rec.kcal) : 0;
+    copyText(`【躺平战报】今天躺了 ${todayH} 小时，摸鱼 ${todayIdx}/10，约消耗 ${todayK} 大卡。已连续躺平 ${streak} 天，累计 ${hours} 小时，超过了 ${beat}% 的打工人。${grade.emoji} ${grade.name}。今天也辛苦了。`);
+  });
+
+  /* 树洞 */
+  const feedSend = $('#feedSend');
+  if (feedSend) feedSend.addEventListener('click', () => {
+    const ta = $('#feedText'); const v = (ta.value || '').trim();
+    if (!v) { toast('写两个字再发'); return; }
+    addFeedPost(v); toast('说出来就轻松了'); render();
+  });
+  $$('[data-like]').forEach(b => b.addEventListener('click', () => { toggleFeedLike(b.dataset.like); render(); }));
+  $$('[data-cmt]').forEach(b => b.addEventListener('click', () => {
+    const box = $('#cbox-' + b.dataset.cmt);
+    if (box) box.classList.toggle('open');
+  }));
+    $$('[data-clike]').forEach(b => b.addEventListener('click', () => { toggleFeedCLike(b.dataset.clike); render(); }));
+$$('[data-csend]').forEach(b => b.addEventListener('click', () => {
+    const inp = document.querySelector('[data-cinput="' + b.dataset.csend + '"]');
+    const v = (inp && inp.value || '').trim();
+    if (!v) return;
+    addFeedComment(b.dataset.csend, v); toast('已回复'); render();
+  }));
 
   /* 个人中心 */
   const editName = $('#editName');
